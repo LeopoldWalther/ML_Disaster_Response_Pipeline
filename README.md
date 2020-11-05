@@ -3,7 +3,7 @@ A Machine Learning Pipeline to categorize emergency messages based on the needs 
 
 ### Table of Contents
 
-1. [Installation](#instructions)
+1. [Instructions](#instructions)
 2. [Project Motivation](#motivation)
 3. [File Descriptions](#files)
 4. [Results](#results)
@@ -43,25 +43,21 @@ xxx
 ML_Disaster_Response_Pipeline/
 │
 ├── README.md
-├── xx
-│   ├── xx
-│   │   ├── xx
-│   │   ├── xx
-│   │   ├── xx
-│   │   ├── xx/
-│   │       ├── xx/
-│   │       │  ├── xxx
-│   │       │  ├── xxx
-│   │       ├── x/
-│   │           ├── xx
-│   ├── xx
-│   │   ├── __xx
-│   │   ├── xx
-│   ├── xx
-│   │   ├── xx
-├── xx
-├── xx
-├── xx
+├── app/
+│   ├── template/
+│   │   ├── master.html  # main page of web app
+│   │   ├── go.html  # classification result page of web app
+│   ├── run.py  # Flask file that runs app
+│
+├── data/
+│   ├── disaster_categories.csv  # data to process
+│   ├── disaster_messages.csv  # data to process
+│   ├── process_data.py
+│   ├── InsertDatabaseName.db   # database to save clean data to
+│
+├── models/
+│   ├── train_classifier.py
+│   ├── classifier.pkl  # saved model
 
 ```
 
