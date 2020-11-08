@@ -32,8 +32,10 @@ xxxx
 
 Motivation of this project is to implement a machine learning pipeline
 including Natural Language Processing using the Python Scikit-Learn library.
-The data used to train the model is retrieved from
-[Figure8 Website](xxx).
+This corporate message data is from one of the free datasets provided on the
+[Figure Eight Platform](https://appen.com/resources/datasets/), licensed under
+a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+.
 
 
 ## File Descriptions: <a name="files"></a>
@@ -79,8 +81,9 @@ The results can be seen locally with following the steps:
 
 ## Licensing, Authors, Acknowledgements: <a name="licensing"></a>
 
-I give credit to the Figure8 for the data. You find the Licensing and data
-at [Figure8 Website](xxx).
+This corporate message data is from one of the free datasets provided on the
+[Figure Eight Platform](https://appen.com/resources/datasets/), licensed under
+a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
 
 Feel free to use my code as you please:
 
