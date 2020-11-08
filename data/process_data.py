@@ -48,12 +48,16 @@ def clean_data(df):
     # drop duplicates
     df.drop_duplicates(inplace=True)
     
+    # drop rows with invalid values
+    for column in categories.columns:
+        df = df[df[column] < 2]
+    
     return df
 
 
 def save_data(df, database_filename):
     engine = sqlalchemy.create_engine('sqlite:///' + database_filename)
-    df.to_sql('Categorized_Messages', engine, index=False)
+    df.to_sql('Categorized_Messages', engine, if_exists='replace', index=False)
 
 
 def main():
