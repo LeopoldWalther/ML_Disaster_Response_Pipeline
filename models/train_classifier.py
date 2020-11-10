@@ -5,39 +5,33 @@ import sqlalchemy
 import re
 import sys
 import nltk
-
-nltk.download(['punkt', 'wordnet', 'stopwords', 'words', 'averaged_perceptron_tagger', 'maxent_ne_chunker'])
-from nltk import sent_tokenize, pos_tag, ne_chunk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.stem.porter import PorterStemmer
-
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import GridSearchCV, train_test_split
-
-from sklearn.datasets import make_multilabel_classification
 from sklearn.multioutput import MultiOutputClassifier
-from sklearn.neighbors import KNeighborsClassifier
-
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.metrics import classification_report
+from sklearn.svm import LinearSVC
+import pickle
+import warnings
+warnings.filterwarnings('ignore')
+nltk.download(['punkt', 'wordnet', 'stopwords', 'words'])
 
 
 def load_data(database_filepath):
     """
     Loads data from SQL Database and transforms it for model training
     
-       Args:
-       database_filepath string: SQL database file
-       
-       Returns:
-       X array: Features dataframe
-       Y array: Target dataframe
-       category_names: Target labels list
-       """
+    :param:
+        database_filepath: SQL database file (string)
+    :returns:
+        x: Features (dataframe)
+        y: Targets (dataframe)
+        category_names: Target labels (list)
+    """
     
     # create engine for connection to  database
     engine = sqlalchemy.create_engine('sqlite:///{}'.format(database_filepath))
@@ -46,9 +40,10 @@ def load_data(database_filepath):
     df = pd.read_sql_table('Categorized_Messages', con=engine)
     
     # create feature matrix (numpy array) containing only the messages
+    X = df['message']
     # create target/label matrix containing all possible categories to predict
-    X, Y = df['message'], df.iloc[:, 4:]
-    category_names = Y.columns
+    Y = df.iloc[:, 4:]
+    category_names = df.iloc[:, 4:].columns
     
     return X, Y, category_names
 
@@ -71,77 +66,79 @@ def tokenize(text):
     words = word_tokenize(text)
     
     # Stop Word Removal
-    words = [w for w in words if w not in stopwords.words('english')]
+    stop_words = stopwords.words('english')
+    words = [w for w in words if w not in stop_words]
     
     # Lemmatization
     lemmatizer = WordNetLemmatizer()
-    lemmatized = [lemmatizer.lemmatize(w) for w in words]
-    lemmatized = [lemmatizer.lemmatize(w, pos='v') for w in lemmatized]
+    lem = [lemmatizer.lemmatize(w) for w in words]
+    lem = [lemmatizer.lemmatize(w, pos='v') for w in lem]
     
-    return lemmatized
+    return lem
 
 
 def build_model():
     """
     Builds a model using Random Forest Classifier. Data is transformed in pipeline using Tokenization, Count Vectorizer,
     Tfidf Transformer and
-
-    Returns:
-    Trained model after performing grid search
+    
+    :return: cv: Trained model after performing grid search (GridSearchCV model)
     """
+    
     # define pipeline with estimators including a few transformers and a classifier
     pipeline = Pipeline([
-        ('features', FeatureUnion([
-            ('text_pipeline', Pipeline([
-                ('vect', CountVectorizer(tokenizer=tokenize,
-                                         #ngram_range=(1, 1),
-                                         #max_df=0.5,
-                                         #max_features=5000
-                                         )
-                 ),
-                ('tfidf', TfidfTransformer()),
-            ]))  # ,
-            # ('pos', PartOfSpeechInterpreter())
+        
+        ('text_pipeline', Pipeline([
+            ('vect', CountVectorizer(tokenizer=tokenize, ngram_range=(1, 2), max_df=0.5, max_features=None)),
+            ('tfidf', TfidfTransformer()),
         ])),
-        ('multi_clf', MultiOutputClassifier(RandomForestClassifier(
-            #n_estimators=100,
-            min_samples_split=4
-        )))
+        ('multi_clf', MultiOutputClassifier(OneVsRestClassifier(LinearSVC())))
     ])
-    # Possible alternatives:  DecisionTreeClassifier, ExtraTreeClassifier, RandomForestClassifier,
-    # KNeighborsClassifier, RadiusNeighborsClassifierr
     
     # define parameters to perform grid search on pipeline
     parameters = {
-        'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
-        'features__text_pipeline__vect__max_df': (0.5, 0.75, 1.0),
-        'features__text_pipeline__vect__max_features': (None, 5000, 10000),
-        #'features__pos__use_idf': (True, False)#,
-        'multi_clf__estimator__n_estimators': [50, 100, 200],
-        'multi_clf__estimator__min_samples_split': [2, 3, 4]#,
-        #'features__transformer_weights': (
-        #{'text_pipeline': 1, 'pos': 0.5},
-        #{'text_pipeline': 0.5, 'pos': 1},
-        #{'text_pipeline': 0.8, 'pos': 1},
+        #'text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
+        'text_pipeline__vect__max_features': (None, 10000)
     }
-
-    # create GridSearchCV object with pipeline
-    # n_jobs= use all processors available in parallel
-    # cv= use the default 5-fold cross validation
-    # verbose= more messages
-    cv = GridSearchCV(estimator=pipeline, param_grid=parameters, scoring='f1_macro', cv=None, n_jobs=-1, verbose=10)
-
-    return cv
     
+    # create GridSearchCV object with pipeline
+    cv = GridSearchCV(estimator=pipeline, param_grid=parameters, scoring='f1_macro', n_jobs=1, verbose=10)
+    
+    return cv
+
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    """
+    Measures model's performance on test data and prints out results.
+    
+    :param model: trained model (GridSearchCV Object)
+    :param X_test: Test features (dataframe)
+    :param Y_test: Test targets (dataframe)
+    :param category_names: Target labels (dataframe)
+    """
+    
+    # predict target values Y_pred of test features
+    Y_pred = model.predict(X_test)
+
+    print(classification_report(Y_test, Y_pred, target_names=category_names))
+    
+    print("\nBest Parameters:", model.best_params_)
 
 
 def save_model(model, model_filepath):
-    pass
+    """
+    Function to save trained model as pickle file.
 
+    :param model: Trained model (GridSearchCV Object)
+    :param model_filepath: Filepath to store model (string)
 
+    :return: None
+    """
+    # save model
+    pickle.dump(model, open(model_filepath, 'wb'))
+
+    
+    
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
