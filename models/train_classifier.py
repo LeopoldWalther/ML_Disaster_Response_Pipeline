@@ -132,7 +132,7 @@ def save_model(model, model_filepath):
     :return: None
     """
     # save model
-    pickle.dump(model, open(model_filepath, 'wb'))
+    pickle.dump(model.best_estimator_, open(model_filepath, 'wb'))
 
     
     
