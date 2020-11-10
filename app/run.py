@@ -1,31 +1,42 @@
 import json
 import plotly
-import pandas as pd
-
+import re
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-
+from nltk.corpus import stopwords
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
 import joblib
-from sqlalchemy import create_engine
-
 from plots.figures import return_figures, load_data
 
 app = Flask(__name__)
 
 
 def tokenize(text):
-    tokens = word_tokenize(text)
+    """
+    Tokenizes text data using
+
+    :param text: Messages as text data (string)
+
+    :returns lem: Processed text after normalizing, tokenizing and lemmatizing (list)
+    """
+    
+    # Normalize
+    text = re.sub(r'[^a-zA-Z0-9]', ' ', text.lower())  # Punctuation Removal and Case Normalizing
+    
+    # Tokenize
+    words = word_tokenize(text)
+    
+    # Stop Word Removal
+    stop_words = stopwords.words('english')
+    words = [w for w in words if w not in stop_words]
+    
+    # Lemmatization
     lemmatizer = WordNetLemmatizer()
+    lem = [lemmatizer.lemmatize(w) for w in words]
+    lem = [lemmatizer.lemmatize(w, pos='v') for w in lem]
     
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-    
-    return clean_tokens
+    return lem
 
 
 # load model
@@ -37,7 +48,7 @@ df = load_data()
 @app.route('/index')
 def index():
     
-    # load visuals
+    # create visuals
     figures = return_figures()
     
     # encode plotly graphs in JSON
@@ -61,11 +72,7 @@ def go():
     classification_results = dict(zip(df.columns[4:], classification_labels))
     
     # This will render the go.html Please see that file. 
-    return render_template(
-        'go.html',
-        query=query,
-        classification_result=classification_results
-    )
+    return render_template('go.html', query=query, classification_result=classification_results)
 
 
 def main():
