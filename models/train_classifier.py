@@ -25,12 +25,11 @@ def load_data(database_filepath):
     """
     Loads data from SQL Database and transforms it for model training
     
-    :param:
-        database_filepath: SQL database file (string)
-    :returns:
-        x: Features (dataframe)
-        y: Targets (dataframe)
-        category_names: Target labels (list)
+    :param database_filepath: SQL database file (string)
+    
+    :returns x: Features (dataframe)
+    :returns y: Targets (dataframe)
+    :returns category_names: Target labels (list)
     """
     
     # create engine for connection to  database
@@ -52,11 +51,9 @@ def tokenize(text):
     """
     Tokenizes text data using
     
-    Args:
-    text str: Messages as text data
+    :param text: Messages as text data (string)
     
-    Returns:
-    words list: Processed text after normalizing, tokenizing and lemmatizing
+    :returns lem: Processed text after normalizing, tokenizing and lemmatizing (list)
     """
     
     # Normalize
@@ -82,7 +79,7 @@ def build_model():
     Builds a model using Random Forest Classifier. Data is transformed in pipeline using Tokenization, Count Vectorizer,
     Tfidf Transformer and
     
-    :return: cv: Trained model after performing grid search (GridSearchCV model)
+    :return cv: Trained model after performing grid search (GridSearchCV model)
     """
     
     # define pipeline with estimators including a few transformers and a classifier
