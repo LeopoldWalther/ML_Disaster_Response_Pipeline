@@ -11,6 +11,8 @@ from plotly.graph_objs import Bar
 import joblib
 from sqlalchemy import create_engine
 
+from plots.figures import return_figures, load_data
+
 app = Flask(__name__)
 
 
@@ -26,52 +28,26 @@ def tokenize(text):
     return clean_tokens
 
 
-# load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
-df = pd.read_sql_table('Categorized_Messages', con=engine)
-
 # load model
 model = joblib.load("../models/classifier.pkl")
-
+df = load_data()
 
 # index webpage displays visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
     
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-            
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
-    ]
+    # load visuals
+    figures = return_figures()
     
     # encode plotly graphs in JSON
-    ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
-    graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+    ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
+
+    # Convert the plotly figures to JSON for javascript in html template
+    figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
     
     # render web page with plotly graphs
-    return render_template('master.html', ids=ids, graphJSON=graphJSON, data_set=df)
+    return render_template('master.html', ids=ids, graphJSON=figuresJSON)
 
 
 # web page that handles user query and displays model results
