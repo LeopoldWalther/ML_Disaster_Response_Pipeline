@@ -26,15 +26,14 @@ def return_figures():
     # extract data needed for visuals
     df = load_data()
     
-
     # create visuals
     graph_one = []
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     graph_one.append(
         go.Bar(
-        x = genre_names,
-        y = genre_counts,
+            x=genre_names,
+            y=genre_counts,
         )
     )
     
@@ -42,9 +41,25 @@ def return_figures():
                       xaxis=dict(title='Genre'),
                       yaxis=dict(title='Count')
                       )
-
+    
+    graph_two = []
+    category_examples_count = df[df.columns[4:]].sum().sort_values(ascending=False)
+    category_names = list(category_examples_count.index)
+    graph_two.append(
+        go.Bar(
+            x=category_names,
+            y=category_examples_count,
+        )
+    )
+    
+    layout_two = dict(title='Distribution of Message Categories',
+                      xaxis=dict(title='Category'),
+                      yaxis=dict(title='Count')
+                      )
+    
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
+    figures.append((dict(data=graph_two, layout=layout_two)))
     
     return figures
