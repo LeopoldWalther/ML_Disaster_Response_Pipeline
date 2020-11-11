@@ -28,38 +28,50 @@ def return_figures():
     
     # create visuals
     graph_one = []
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
-    graph_one.append(
-        go.Bar(
-            x=genre_names,
-            y=genre_counts,
-        )
-    )
-    
-    layout_one = dict(title='Distribution of Message Genres',
-                      xaxis=dict(title='Genre'),
-                      yaxis=dict(title='Count')
-                      )
-    
-    graph_two = []
     category_examples_count = df[df.columns[4:]].sum().sort_values(ascending=False)
     category_names = list(category_examples_count.index)
-    graph_two.append(
+    graph_one.append(
         go.Bar(
             x=category_names,
             y=category_examples_count,
         )
     )
     
-    layout_two = dict(title='Distribution of Message Categories',
+    layout_one = dict(title='Distribution of Message Categories',
                       xaxis=dict(title='Category'),
                       yaxis=dict(title='Count')
                       )
+
+
+
+
+
+
+
+
+    graph_three = []
+    genre_counts = df.groupby('genre').count()['message']
+    genre_names = list(genre_counts.index)
+    graph_three.append(
+        go.Bar(
+            x=genre_names,
+            y=genre_counts,
+        )
+    )
+
+    layout_three = dict(title='Distribution of Message Genres',
+                      xaxis=dict(title='Genre'),
+                      yaxis=dict(title='Count')
+                      )
+    
+    
+    
+    
     
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
-    figures.append((dict(data=graph_two, layout=layout_two)))
+    #figures.append(dict(data=graph_two, layout=layout_two))
+    figures.append(dict(data=graph_three, layout=layout_three))
     
     return figures
