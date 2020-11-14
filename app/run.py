@@ -1,42 +1,28 @@
 import json
 import plotly
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 import joblib
 from plots.figures import return_figures, load_data
+from models.train_classifier import tokenize
 
 app = Flask(__name__)
-
-
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-    
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-    
-    return clean_tokens
-
 
 # load model
 model = joblib.load("../models/classifier.pkl")
 df, Y_test, Y_pred = load_data()
 
+
 # index webpage displays visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
-    
     # create visuals
     figures = return_figures()
     
     # encode plotly graphs in JSON
     ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
-
+    
     # Convert the plotly figures to JSON for javascript in html template
     figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
     
