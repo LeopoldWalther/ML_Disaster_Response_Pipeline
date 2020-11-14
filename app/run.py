@@ -1,9 +1,7 @@
 import json
 import plotly
-import re
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
 from flask import Flask
 from flask import render_template, request, jsonify
 import joblib
@@ -13,35 +11,20 @@ app = Flask(__name__)
 
 
 def tokenize(text):
-    """
-    Tokenizes text data using
-
-    :param text: Messages as text data (string)
-
-    :returns lem: Processed text after normalizing, tokenizing and lemmatizing (list)
-    """
-    
-    # Normalize
-    text = re.sub(r'[^a-zA-Z0-9]', ' ', text.lower())  # Punctuation Removal and Case Normalizing
-    
-    # Tokenize
-    words = word_tokenize(text)
-    
-    # Stop Word Removal
-    stop_words = stopwords.words('english')
-    words = [w for w in words if w not in stop_words]
-    
-    # Lemmatization
+    tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
-    lem = [lemmatizer.lemmatize(w) for w in words]
-    lem = [lemmatizer.lemmatize(w, pos='v') for w in lem]
     
-    return lem
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+    
+    return clean_tokens
 
 
 # load model
 model = joblib.load("../models/classifier.pkl")
-df = load_data()
+df, Y_test, Y_pred = load_data()
 
 # index webpage displays visuals and receives user input text for model
 @app.route('/')

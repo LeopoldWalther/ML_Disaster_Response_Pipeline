@@ -12,8 +12,11 @@ def load_data():
     # load data
     engine = create_engine('sqlite:///../data/DisasterResponse.db')
     df = pd.read_sql_table('Categorized_Messages', con=engine)
+
+    Y_pred = pd.read_sql_table('Y_pred', con=engine)
+    Y_test = pd.read_sql_table('Y_test', con=engine)
     
-    return df
+    return df, Y_test, Y_pred
 
 
 def return_figures():
@@ -24,7 +27,7 @@ def return_figures():
     """
     
     # extract data needed for visuals
-    df = load_data()
+    df, Y_test, Y_pred = load_data()
     
     # create visuals
     graph_one = []
