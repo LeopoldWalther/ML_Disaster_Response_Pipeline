@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # load model
 model = joblib.load("../models/classifier.pkl")
-df, Y_test, Y_pred = load_data()
+df, df_report = load_data()
 
 
 # index webpage displays visuals and receives user input text for model

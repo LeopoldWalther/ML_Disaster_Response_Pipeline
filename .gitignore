@@ -1,2 +1,5 @@
 .DS_Store
 models/classifier.pkl
+app/plots/__pycache__/*
+models/__pycache__/
+.idea/

@@ -105,6 +105,31 @@ def build_model():
     return cv
 
 
+def classification_report_df(report):
+    """
+    Function to create pandas dataframe from classification report.
+
+    :param report: Classification report created with sklearn.metrics.classification_report
+
+    :returns df_report: Dataframe containing the classification report
+    """
+    report_data = []
+    lines = report.split('\n')
+    for line in lines[2:-6]:
+        row = {}
+        row_data = line.split(' ')
+        row_data = list(filter(None, row_data))
+        row['class'] = row_data[0]
+        row['precision'] = float(row_data[1])
+        row['recall'] = float(row_data[2])
+        row['f1_score'] = float(row_data[3])
+        row['support'] = float(row_data[4])
+        report_data.append(row)
+    df_report = pd.DataFrame.from_dict(report_data)
+    
+    return df_report
+
+
 def evaluate_model(model, X_test, Y_test, category_names):
     """
     Measures model's performance on test data and prints out results.
@@ -113,18 +138,21 @@ def evaluate_model(model, X_test, Y_test, category_names):
     :param X_test: Test features (dataframe)
     :param Y_test: Test targets (dataframe)
     :param category_names: Target labels (dataframe)
-
-    :return model_report: Model Performance report
+    
+    :return model_report: Dataframe with Model Performance report
     """
     
     # predict target values Y_pred of test features
     Y_pred = model.predict(X_test)
-    
+
     print(classification_report(Y_test, Y_pred, target_names=category_names))
+    
+    report = classification_report(Y_test, Y_pred, target_names=category_names)
+    df_report = classification_report_df(report)
     
     print("\nBest Parameters:", model.best_params_)
     
-    return Y_pred
+    return df_report
 
 
 def save_model(model, model_filepath):
@@ -140,22 +168,17 @@ def save_model(model, model_filepath):
     pickle.dump(model.best_estimator_, open(model_filepath, 'wb'))
 
 
-def save_score(Y_pred, Y_test):
+def save_report(df_report):
     """
      Function to save the score of the trained model on test data
     
-    :param Y_test: Targets of test data
-    :param Y_pred: Model prediction for test data
+    :param: df_report: Dataframe containing the classification report
 
     :return: None
      """
     engine = sqlalchemy.create_engine('sqlite:///../data/DisasterResponse.db')
     
-    Y_pred = pd.DataFrame(Y_pred)
-    Y_test = pd.DataFrame(Y_test)
-    
-    Y_pred.to_sql('Y_pred', engine, index=False, if_exists='replace')
-    Y_test.to_sql('Y_test', engine, index=False, if_exists='replace')
+    df_report.to_sql('df_report', engine, index=False, if_exists='replace')
 
 
 def main():
@@ -172,14 +195,14 @@ def main():
         model.fit(X_train, Y_train)
         
         print('Evaluating model...')
-        Y_pred = evaluate_model(model, X_test, Y_test, category_names)
+        df_report = evaluate_model(model, X_test, Y_test, category_names)
         
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)
         
         print('Trained model saved!')
     
-        save_score(Y_pred, Y_test)
+        save_report(df_report)
         print('Model performance score saved!')
     
     else:
