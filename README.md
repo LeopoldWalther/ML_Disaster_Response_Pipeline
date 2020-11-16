@@ -1,6 +1,8 @@
 # ML_Disaster_Response_Pipeline
 A Machine Learning Pipeline to categorize emergency messages based on the needs communicated by the sender. Project includes Flask Web Application.
 
+![Screenshot of Web App Index](WebApp_index.png "Screenshot of Web App Index")
+
 ### Table of Contents
 
 1. [Instructions](#instructions)
@@ -10,23 +12,40 @@ A Machine Learning Pipeline to categorize emergency messages based on the needs 
 5. [Licensing, Authors, and Acknowledgements](#licensing)
 
 ## Instructions: <a name="instructions"></a>
-1. Run the following commands in the project's root directory to set up your database and model.
-
-    - To run ETL pipeline that cleans data and stores in database
-        `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
-    - To run ML pipeline that trains classifier and saves
-        `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
-
-2. Run the following command in the app's directory to run your web app.
-    `python run.py`
-
-3. Go to http://0.0.0.0:3001/
-
 
 The project was created with Python 3.8.0.
-Install the virtual environment with the rquired python libraries using
-requirements.txt.
-xxxx
+Run the following commands to initiate thw project:
+
+1. create virtual environment in folder **ML_Disaster_Response_Pipeline/**:
+
+  `python3 -m venv disaster_response_env`
+
+2. activate the virtual environment:
+
+  `source disaster_response_env/bin/activate`
+
+3. pip install required packages:
+
+  `pip install -r requirements.txt`
+
+4. change directory to **ML_Disaster_Response_Pipeline**:
+
+  `cd ML_Disaster_Response_Pipeline6.
+
+5. Run ETL pipeline that cleans data and stores in database:
+
+  `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
+
+7. Run ML pipeline that trains classifier and saves
+
+  `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
+
+8. Run the following command in the app's directory to run your web app.
+    `python run.py`
+
+9. Go to local host:
+ http://0.0.0.0:3001/
+
 
 ## Project Motivation: <a name="motivation"></a>
 
@@ -35,27 +54,32 @@ including Natural Language Processing using the Python Scikit-Learn library.
 This corporate message data is from one of the free datasets provided on the
 [Figure Eight Platform](https://appen.com/resources/datasets/), licensed under
 a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
-.
+
 
 
 ## File Descriptions: <a name="files"></a>
-xxx
+The project contains the following files:
 
 ```
 ML_Disaster_Response_Pipeline/
 │
 ├── README.md
+├── requirements.txt
+├── LICENSE
 ├── app/
 │   ├── template/
 │   │   ├── master.html  # main page of web app
 │   │   ├── go.html  # classification result page of web app
+│   │
+│   ├── template/
+│   │   ├── figures.py  # script to create python figures
 │   ├── run.py  # Flask file that runs app
 │
 ├── data/
 │   ├── disaster_categories.csv  # data to process
 │   ├── disaster_messages.csv  # data to process
 │   ├── process_data.py
-│   ├── InsertDatabaseName.db   # database to save clean data to
+│   ├── DisasterResponse.db   # database to save clean data to
 │
 ├── models/
 │   ├── train_classifier.py
@@ -65,19 +89,26 @@ ML_Disaster_Response_Pipeline/
 
 
 ## Results: <a name="results"></a>
-The results can be seen locally with following the steps:
-* create virtual environment in folder **ML_Disaster_Response_Pipeline/**:
-  - `python3 -m venv disaster_response_env`
-* activate the virtual environment:
-  - `source disaster_response_env/bin/activate`
-* pip install required packages:
-  - `pip install -r requirements.txt`
-* change directory to **ML_Disaster_Response_Pipeline**:
-  - `cd ML_Disaster_Response_Pipeline'
-* start Flask Web App:
-  - python xxx.py
-* Now open in your browser the following url:
-  - `http://0.0.0.0:3001/`
+
+#### Data Cleaning:
+The process_data.py script loads the disaster_categories.csv and
+disaster_messages.csv files. The data of both csv's is merged into one dataframe.
+In the next step the category columns are transformed so that the column names
+fit the categories and the cells only contain values zero or one, meaning
+true or false. Rows containing values higher than one are dropped.
+
+#### Imbalance of data and resulting f1 score:
+As visible in the visualization of the Web Application the input data containing
+the messages is imbalanced regarding the categories of the tweets. There are
+19906 messages categorized as "related", 10860 "aid related" and 7297 "weather
+related". On the other extreme there are only 298 messages categorized as
+"missing people" and 724 "search and rescue".
+This results into relatively high f1 scores for classifying messages of the
+categories with more examples in the training and test data and a bad
+performance for those categories with few examples int the training and test
+data.
+
+![Screenshot of Web App Figure](WebApp_figures.png "Screenshot of Figures")
 
 ## Licensing, Authors, Acknowledgements: <a name="licensing"></a>
 
